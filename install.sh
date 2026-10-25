@@ -1,15 +1,22 @@
 #!/bin/bash
-# One-time install, run as: sudo bash ~/ipod-nano6g-fix/install.sh
-# Only use after raw dd image verified (you did: 152f9bfc... match).
+# One-time install for the Nano6G uploader.
+# Run as: sudo bash install.sh   (from anywhere; paths follow this script)
+# Only use after verifying a raw dd backup of the iPod.
 set -euo pipefail
-STAGE="$HOME/ipod-nano6g-fix/nano6g-libs"
-if [ "$(id -u)" -ne 0 ]; then echo "run with sudo"; exit 1; fi
-USER_HOME="$(getent passwd "${SUDO_USER:-lemion}" | cut -d: -f6)"
-STAGE="$USER_HOME/ipod-nano6g-fix/nano6g-libs"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STAGE="$SCRIPT_DIR/nano6g-libs"
 DST="/usr/lib/libgpod"
 STORE="/usr/local/share/ipod-nano6g/nano6g-libs"
 HOOK="/etc/pacman.d/hooks/libhashab-nano6g.hook"
 FIXER="/usr/local/sbin/ipod-nano6g-fix.sh"
+
+if [ "$(id -u)" -ne 0 ]; then echo "run with sudo"; exit 1; fi
+if [ ! -d "$DST" ]; then echo "libgpod not found at $DST; install libgpod first"; exit 1; fi
+for f in libhashab64_original.so libhashab32.so libhashab32_wrapper; do
+  [ -f "$STAGE/$f" ] || { echo "missing $STAGE/$f; run this from the cloned repo"; exit 1; }
+done
+[ -f "$SCRIPT_DIR/reapply.sh" ] || { echo "missing $SCRIPT_DIR/reapply.sh"; exit 1; }
 
 echo "== backup stock =="
 mkdir -p "$DST/stock-backup-20260930"
@@ -23,7 +30,7 @@ mkdir -p "$STORE"
 cp -f "$STAGE/libhashab64_original.so" "$STORE/"
 cp -f "$STAGE/libhashab32.so" "$STORE/"
 cp -f "$STAGE/libhashab32_wrapper" "$STORE/"
-cp -f "$USER_HOME/ipod-nano6g-fix/reapply.sh" "$FIXER"
+cp -f "$SCRIPT_DIR/reapply.sh" "$FIXER"
 chmod 755 "$FIXER"
 bash "$FIXER"
 

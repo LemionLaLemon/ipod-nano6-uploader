@@ -1,5 +1,5 @@
 #!/bin/bash
-# Revert to stock, run as: sudo bash ~/ipod-nano6g-fix/restore-stock.sh
+# Revert to stock, run as: sudo bash restore-stock.sh
 set -euo pipefail
 DST="/usr/lib/libgpod"
 if [ "$(id -u)" -ne 0 ]; then echo "run with sudo"; exit 1; fi

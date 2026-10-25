@@ -1,6 +1,6 @@
 #!/bin/bash
 # Re-apply Nano 6G files after libgpod/sg3_utils upgrades.
-# Installed by ~/ipod-nano6g-fix/install.sh, triggered by pacman hook.
+# Copied to /usr/local/sbin by install.sh, triggered by pacman hook.
 set -u
 SRC="/usr/local/share/ipod-nano6g/nano6g-libs"
 DST="/usr/lib/libgpod"

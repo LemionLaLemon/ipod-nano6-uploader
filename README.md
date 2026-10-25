@@ -1,5 +1,10 @@
 # Nano6G Uploader
 
+> **AI-generated project.** Every line of code in this repository was written by
+> an AI, working from a human's direction and tested against a real device. It is
+> not hand-written, so read it before trusting it with your music library — and
+> back up your iPod with a raw `dd` image first.
+
 A Linux desktop uploader for the **iPod Nano 6th generation** (firmware 1.70):
 music, playlists, artwork, photos, URL downloads, and library checks. It writes
 directly to the device's SQLite databases, native artwork stores, and the
@@ -7,13 +12,15 @@ Nano-compatible signing library.
 
 ## Install
 
-Clone into `~/ipod-nano6g-fix` (the install scripts use that path) and run the
-one-time installer:
+The scripts resolve their own location, so the repo can live anywhere. Clone it
+and run the one-time installer as root:
 
 ```sh
-git clone https://github.com/LemionLaLemon/ipod-nano6-uploader.git ~/ipod-nano6g-fix
-sudo bash ~/ipod-nano6g-fix/install.sh
+git clone https://github.com/LemionLaLemon/ipod-nano6-uploader.git
+cd ipod-nano6-uploader
+sudo bash install.sh
 ```
+
 
 Then launch `python3 ipod_gui_qt.py` for the Qt interface (the rofi entry
 **Nano Gen 6 Uploader** runs this), or `python3 ipod_gui.py` for the smaller

@@ -3,7 +3,7 @@
 Music: Library.itdb + Locations.itdb + Locations.itdb.cbk (HASHAB via libhashab).
 Playlist: container + item_to_container + Dynamic.itdb container_ui.
 Photo: delegated to photo_add binary (libgpod photodb)."""
-import os, sqlite3, hashlib, ctypes, time, shutil, subprocess
+import os, sqlite3, hashlib, ctypes, time, shutil, subprocess, pwd
 from audio_compat import RATES, stream_info, validate_audio
 from pathlib import Path
 from device_io import device_write, database, FileChanges, music_path
@@ -193,15 +193,39 @@ def _next_track_pid(con, mount):
     atomic_write(state_path,json.dumps(dict(version=1,last_track_pid=pid)).encode())
     return pid
 
-def find_mount():
-    import subprocess as sp
-    for base in (f"/run/media/{os.environ.get('USER','lemion')}", "/run/media/lemion", "/media"):
+def _mount_roots():
+    user = os.environ.get("USER") or pwd.getpwuid(os.getuid()).pw_name
+    roots = [f"/run/media/{user}", f"/media/{user}", "/media", "/run/media"]
+    for base in ("/run/media", "/media"):
+        try:
+            roots.extend(os.path.join(base, d) for d in os.listdir(base))
+        except OSError:
+            pass
+    unique = []
+    for root in roots:
+        if root not in unique:
+            unique.append(root)
+    return unique
+
+def _ipod_mount_in(roots):
+    for base in roots:
         if not os.path.isdir(base):
             continue
-        for d in os.listdir(base):
+        try:
+            entries = os.listdir(base)
+        except OSError:
+            continue
+        for d in entries:
             p = os.path.join(base, d)
             if os.path.isdir(os.path.join(p, "iPod_Control")):
                 return p
+    return None
+
+def find_mount():
+    import subprocess as sp
+    found = _ipod_mount_in(_mount_roots())
+    if found:
+        return found
     # not mounted: find IPOD partition and mount it
     try:
         import json
@@ -216,13 +240,7 @@ def find_mount():
         for name in devs:
             dev = name if name.startswith("/dev/") else f"/dev/{name}"
             sp.run(["udisksctl", "mount", "-b", dev], capture_output=True, text=True, timeout=30)
-        for base in (f"/run/media/{os.environ.get('USER','lemion')}", "/run/media/lemion"):
-            if not os.path.isdir(base):
-                continue
-            for d in os.listdir(base):
-                p = os.path.join(base, d)
-                if os.path.isdir(os.path.join(p, "iPod_Control")):
-                    return p
+        return _ipod_mount_in(_mount_roots())
     except Exception:
         pass
     return None
