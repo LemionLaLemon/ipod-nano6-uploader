@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Qt / Tk artifacts
+*.qmlc
+*.pyc.cache
+
+# Local scratch output
+*.log
+*.tmp
+/tmp/
